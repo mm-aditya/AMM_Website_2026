@@ -180,7 +180,8 @@ b {
   opacity: 0.3;
 }
 
-.index-scroll .index-row:hover {
+/* same :has ancestor so this out-specifies the dimming rule above */
+.index-scroll:has(.index-row:hover) .index-row:hover {
   opacity: 1;
 }
 
