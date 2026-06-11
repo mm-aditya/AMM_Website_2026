@@ -9,13 +9,22 @@
     "dev": "astro dev",
     "prebuild": "node scripts/validate-content.mjs",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "npm run build && wrangler dev",
     "new": "node scripts/new-project.mjs",
     "check": "node scripts/validate-content.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "generate-types": "wrangler types",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^13.7.0",
     "@astrojs/mdx": "^6.0.3",
     "astro": "^6.4.6"
+  },
+  "devDependencies": {
+    "wrangler": "^4.99.0"
+  },
+  "overrides": {
+    "vite": "^7"
   }
 }
