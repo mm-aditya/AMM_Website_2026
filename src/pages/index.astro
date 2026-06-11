@@ -22,6 +22,12 @@ const vidMods = import.meta.glob<string>('../content/work/**/*.{mp4,webm}', {
 async function resolvePreviews(slug: string, names: string[]) {
   const out: { t: 'img' | 'vid'; src: string }[] = [];
   for (const name of names) {
+    // External URL (e.g. Gumlet) — pass straight through, type by extension
+    if (/^https?:\/\//.test(name)) {
+      out.push({ t: /\.(mp4|webm)(\?|$)/i.test(name) ? 'vid' : 'img', src: name });
+      continue;
+    }
+    // Local file committed in the project folder — optimized at build
     const key = `../content/work/${slug}/${name.replace(/^\.\//, '')}`;
     if (key in vidMods) {
       out.push({ t: 'vid', src: vidMods[key] });

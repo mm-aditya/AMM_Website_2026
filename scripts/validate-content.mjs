@@ -74,6 +74,8 @@ for (const slug of projects) {
   }
 
   for (const p of previews) {
+    // External URLs (e.g. Gumlet) are served as-is — nothing to check locally
+    if (/^https?:\/\//.test(p)) continue;
     const file = path.join(dir, p.replace(/^\.\//, ''));
     const ext = path.extname(p).toLowerCase();
     if (!fs.existsSync(file)) {

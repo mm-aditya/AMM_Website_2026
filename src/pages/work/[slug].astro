@@ -28,7 +28,14 @@ const slugOf = (p: typeof project) => p.id.replace(/\/index$/, '');
 
 const { Content } = await render(project);
 const metaLine = [data.year, data.role, data.client].filter(Boolean).join(' · ');
-const ogImage = data.hero ? (await getImage({ src: data.hero, width: 1200 })).src : undefined;
+
+// hero can be a local image (ImageMetadata) or an external URL (string, e.g. Gumlet)
+const heroIsUrl = typeof data.hero === 'string';
+const ogImage = data.hero
+  ? heroIsUrl
+    ? (data.hero as string)
+    : (await getImage({ src: data.hero, width: 1200 })).src
+  : undefined;
 ---
 
 <BaseLayout title={`${data.title} — Aditya Manikashetti`} description={data.summary} ogImage={ogImage}>
@@ -49,12 +56,16 @@ const ogImage = data.hero ? (await getImage({ src: data.hero, width: 1200 })).sr
           </div>
         ) : data.hero ? (
           <div class="project-hero">
-            <Image
-              src={data.hero}
-              alt={data.title}
-              widths={[760, 1200, 1600]}
-              sizes="(max-width: 980px) 100vw, 940px"
-            />
+            {heroIsUrl ? (
+              <img src={data.hero as string} alt={data.title} loading="eager" />
+            ) : (
+              <Image
+                src={data.hero}
+                alt={data.title}
+                widths={[760, 1200, 1600]}
+                sizes="(max-width: 980px) 100vw, 940px"
+              />
+            )}
           </div>
         ) : null
       }

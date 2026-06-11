@@ -11,14 +11,31 @@ Repo: https://github.com/mm-aditya/AMM_Website_2026
 
 1. `npm run new "Project Name"` → scaffolds `src/content/work/project-name/index.mdx` with
    `draft: true` and the full frontmatter template.
-2. Fill the frontmatter (schema below) and write the body (components below).
-3. Drop media files into the same folder (rules below).
+2. Upload the media to Gumlet (films AND images — see Media rules) and collect the URLs/IDs.
+3. Fill the frontmatter (schema below) and write the body (components below), referencing the
+   Gumlet URLs.
 4. Set `draft: false`.
-5. **`npm run check`** — the content validator. Fix everything it reports.
-6. `npm run build` — must pass (schema + validator + build all run).
-7. Publish: `git add -A && git commit -m "Add project: <name>" && git push`. Live in ~1 min.
+5. **`npm run check`** — the content validator. Fix everything it reports. (No local build is
+   required to publish — Cloudflare builds on push — but run `check` always; it is fast and
+   needs no build.)
+6. Publish via the branch you were told to use (see "Publishing & previewing" below).
 
-Editing a project = editing its `index.mdx`, then steps 5–7. Unpublishing = `draft: true`.
+Editing a project = editing its `index.mdx`, then re-running `check` and pushing.
+Unpublishing = set `draft: true` and push.
+
+## Publishing & previewing (no local build needed)
+
+Cloudflare builds the site in the cloud on every push, so an agent on a VPS never needs a
+local `npm run build`.
+
+- **Preview before it goes live:** commit to the **`staging`** branch and push it. Cloudflare
+  builds it and serves it at a stable URL — `staging.<project>.pages.dev` — that Aditya can
+  open from any device. Iterate on `staging` until he approves.
+- **Publish:** once approved, fast-forward `main` to `staging` and push `main`
+  (`git checkout main && git merge --ff-only staging && git push`). `main` is the live site.
+- **Default to `staging`** for anything Aditya should see first. Only push straight to `main`
+  for changes he has explicitly pre-approved.
+- `draft: true` hides an unfinished project even on whichever branch it's on; it never renders.
 
 ## Frontmatter schema (zod-validated at build; unknown fields fail the build)
 
@@ -30,10 +47,10 @@ role: "Director"                 # required — Director | Creative Director | C
 client: "Studio / brand"         # optional
 type: film                       # required: film | tech | writing
 summary: "One sentence that reads naturally before the role tag."   # required — see voice rules
-previews: ["./preview.jpg", "./loop.mp4"]   # hover collage, 1–4 items, MUST be this one-line inline form
+previews: ["https://…gumlet…/a.jpg", "https://…/b.jpg"]   # hover collage, 1–4 items, one-line inline form. Gumlet URLs (or local ./files)
 featured: false                  # optional — true pins the project to the top of the index
-hero: ./hero.jpg                 # optional — page lead image
-videoId: "vimeo:76979871"        # optional — provider-prefixed: gumlet:ID | vimeo:ID | youtube:ID
+hero: "https://…gumlet…/hero.jpg"  # optional — page lead image: a Gumlet URL (or a local ./file)
+videoId: "gumlet:ASSETID"        # optional — provider-prefixed: gumlet:ID | vimeo:ID | youtube:ID
 links:                           # optional — external links, rendered at the page bottom
   - { label: "Live site", url: "https://…", note: "Short context" }
 draft: true                      # true = excluded from the site entirely
@@ -50,21 +67,28 @@ image. Only `hero` set → image leads. Neither → page starts with the text (f
 
 ## Media rules
 
-| Media | Where | Spec |
-|---|---|---|
-| Hover previews (images) | project folder, listed in `previews` | ~960×540 JPG, < 1.5 MB each |
-| Hover previews (loops) | project folder, listed in `previews` | mp4/webm, muted, 2–4 s, ≤ 5 MB, ~640px wide |
-| Page hero | project folder, `hero:` | 1600×900 JPG, < 1.5 MB |
-| Body images (stills, screenshots, diagrams) | project folder, imported in MDX | ≤ 1600px wide, < 1.5 MB each |
-| Full films / reels | **Gumlet** (never the repo) | upload there, reference `videoId: "gumlet:ASSETID"` |
+**All media lives on Gumlet** (images and films alike). Upload it there, get the URL/ID, and
+reference it from the frontmatter or MDX. Nothing media-related is committed to the repo.
 
-- NEVER commit a full film to the repo. The validator hard-fails any file over 20 MB.
+| Media | How to reference | Spec |
+|---|---|---|
+| Hover previews (images) | Gumlet image URL in `previews` | ~960×540, landscape |
+| Hover previews (loops) | Gumlet mp4/webm URL in `previews` | muted, 2–4 s, ~640px wide |
+| Page hero | Gumlet image URL in `hero:` | ~1600×900 |
+| Body images (stills, screenshots, diagrams) | Gumlet URL in `<Figure src="https://…" />` | ≤ 1600px wide |
+| Full films / reels | `videoId: "gumlet:ASSETID"` | uploaded to Gumlet video |
+
+- Upload images to Gumlet's image product; upload films to Gumlet's video product. Use the
+  returned delivery URL for images, and the asset ID (as `gumlet:ID`) for films.
+- A body image is just `<Figure src="https://…gumlet…/still.jpg" alt="…" />` — no import,
+  no local file.
 - 1 preview = centered and level. 2–4 previews = a horizontal strip with small gaps and a
   gentle alternating vertical offset. More than 4 gets cramped (validator warns).
-- Make a preview loop from footage with ffmpeg:
-  `ffmpeg -y -i input.mp4 -vf "scale=640:-2" -t 3 -an -c:v libx264 -pix_fmt yuv420p -movflags +faststart loop.mp4`
-  or a slow push-in from a still:
-  `ffmpeg -y -loop 1 -i still.jpg -vf "scale=1280:720,zoompan=z='1+0.10*in/75':d=75:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=640x360:fps=30" -t 2.5 -an -c:v libx264 -pix_fmt yuv420p -movflags +faststart loop.mp4`
+- **Fallback (still supported):** a committed local file also works anywhere a Gumlet URL does
+  — `hero: ./hero.jpg`, `previews: ["./a.jpg"]`, `<Figure src={importedImg} />`. Local images
+  get optimized at build; use this only if you deliberately want media in the repo. The default
+  is Gumlet URLs.
+- NEVER commit a full film to the repo. The validator hard-fails any file over 20 MB.
 
 ## Writing the body (MDX)
 

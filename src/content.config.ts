@@ -12,12 +12,13 @@ const work = defineCollection({
       type: z.enum(['film', 'tech', 'writing']),
       summary: z.string(),
       preview: image().optional(), // deprecated — use `previews`
-      // Hover collage media: filenames relative to the project folder, e.g.
-      // ["./preview.jpg", "./still-01.jpg", "./loop.mp4"]. Images and short
-      // muted mp4/webm loops can be mixed; all pop up together on hover.
+      // Hover collage media. Each entry is either a local file relative to the
+      // project folder ("./still-01.jpg") OR an external URL ("https://…gumlet…").
+      // Images and short muted mp4/webm loops can be mixed; all pop up on hover.
       previews: z.array(z.string()).default([]),
       featured: z.boolean().default(false),
-      hero: image().optional(),
+      // Page lead image: a committed local file OR an external (Gumlet) URL.
+      hero: z.union([image(), z.string().url()]).optional(),
       videoId: z.string().optional(),
       links: z
         .array(
