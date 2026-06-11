@@ -134,8 +134,9 @@ body → links → prev/next):
 ### Voice
 Restrained and concrete. Short sentences. Say what was made, how, and what was hard.
 No marketing language, no superlatives, no "passionate", no exclamation marks, no "delve".
-**Before writing or editing ANY copy (summary, body, captions), read `VOICE.md` in full**
-— it is the canonical tone guide, with rules and calibration examples. Copy that doesn't
+**Before writing or editing ANY copy (summary, body, captions), and before asking Aditya
+about a new project, read `VOICE.md` in full** — it is the canonical guide for tone, what
+makes a page compelling, and what to extract from Aditya at intake. Copy that doesn't
 match it doesn't ship.
 
 ## Design rules (relevant only if Aditya asks for design work)

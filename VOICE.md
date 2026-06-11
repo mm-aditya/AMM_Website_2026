@@ -1,9 +1,11 @@
 # Voice guide
 
-How copy on this site is written: every `summary`, every body paragraph, every caption.
-Read this in full before writing or editing any project copy. The current placeholder
-projects in `src/content/work/` were written to this guide; the examples below are quoted
-from them so the standard survives after they are replaced with real work.
+How copy on this site is written: every `summary`, every body paragraph, every caption —
+and how to get the raw material out of Aditya before writing it. Read this in full before
+writing or editing any project copy, and before interviewing Aditya about a new project.
+The current placeholder projects in `src/content/work/` were written to this guide; the
+examples below are quoted from them so the standard survives after they are replaced with
+real work.
 
 ## The voice in one paragraph
 
@@ -11,6 +13,67 @@ A working director describing finished work to a peer, after the fact, with no n
 sell it. Every sentence carries a fact: what was made, under what constraint, and what
 decision shaped it. Confidence comes from specificity, never from adjectives. If a
 sentence would survive in a grant application or a LinkedIn post, it is wrong here.
+
+## What these pages are for
+
+A project page is a sell, not a technical document or a production report. Assume the
+visitor reads the summary, the first paragraph, and the stills — and only continues if
+something caught. Everything that earns attention lives up top; technical depth lives
+lower down or gets cut.
+
+The sell and the voice are not in tension. The voice never gets salesy — the *selection*
+does the selling. You sell harder by finding a better fact, never by writing bigger.
+"Lit almost entirely with sodium vapor practicals already in the yard" is a sell: it makes
+a peer want to see the film and tells a client this director solves problems with what's
+in the room. It just doesn't sound like one.
+
+Order of priority on the page:
+
+1. **The hook** — the one fact only this project owns, in the summary and the opening
+   line. The thing a visitor would repeat to someone else.
+2. **The constraint** — what there wasn't enough of, and what it forced. Constraint is
+   story; budget lines are not.
+3. **The decision** — one choice with its reason fused, that a different director
+   wouldn't have made.
+4. **Technical detail** — portrayed, not documented. One precise line that signals depth
+   ("graded on a reference monitor calibrated to P3 D65") beats a paragraph of pipeline.
+   Anything a peer wouldn't find interesting gets compressed to a clause or cut. Bigger
+   projects can hold real detail in a chapter below the fold — never in the open.
+
+A reader should leave with one thing they could repeat. If you can't say what that thing
+is, the page isn't done.
+
+## Intake: what to extract from Aditya
+
+Project information will arrive as a production report — a ramble, a deck, a credits
+list, a folder of stills. The page is not a production report, so your job at intake is
+extraction. Mine what he gives you first; ask only for what's missing. Keep it to one
+batch of a few pointed questions, not an interrogation.
+
+What the page needs, in order of importance:
+
+1. **The bar story.** "What do you tell people about this project when you're off the
+   clock?" or "What actually happened on this one?" The answer is usually the hook, and
+   it's the question most worth pushing on if the first answer is generic.
+2. **The numbers.** Days, nights, takes, crew size, locations, months, rounds. Push past
+   "a while" and "a small crew" to the actual count — "four nights, two-person crew" is
+   copy; "a fast shoot with a lean team" is not.
+3. **The constraint.** What was scarce — time, money, access, light, permission — and
+   what it forced him to do differently.
+4. **One decision with its reason.** What he chose that the obvious version of this
+   project wouldn't have. Why.
+5. **The receipt.** What happened after: where it ran, what changed, what's still in use,
+   any measurable result. No receipt, no claim on the page.
+6. **For tech: the irritation.** What kept breaking or dying that made him build it —
+   "Built because timecoded notes kept dying in email threads."
+7. **The kicker candidate.** Anything true that happens to be funny. Often surfaces
+   inside the bar story; listen for it rather than asking for "something funny".
+8. **Boundaries.** Claims he doesn't want made, credits to confirm, anything off the
+   record.
+
+If a question yields nothing, ship the page without that element — brevity is native
+here, and a shorter true page beats a padded one. What you may never do is fill the gap
+yourself: no invented numbers, outcomes, or color.
 
 ## Rules
 
