@@ -24,6 +24,20 @@ const ogImageUrl = ogImage ? new URL(ogImage, base) : undefined;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      // Set theme before first paint (no flash). Default is always light;
+      // only an explicit prior toggle (saved) changes it. System pref is ignored.
+      (() => {
+        const t = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      })();
+      // Keep the choice across view-transition navigations.
+      document.addEventListener('astro:after-swap', () => {
+        const t = localStorage.getItem('theme');
+        if (t) document.documentElement.dataset.theme = t;
+      });
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -39,7 +53,34 @@ const ogImageUrl = ogImage ? new URL(ogImage, base) : undefined;
   </head>
   <body>
     <slot />
+    <button class="theme-toggle" type="button" aria-label="Toggle light or dark theme">
+      <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path
+          d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12h2.5M19 12h2.5M4.2 19.8l1.8-1.8M18 6l1.8-1.8"
+        ></path>
+      </svg>
+      <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4 7 7 0 1 0 20 14.5z"></path>
+      </svg>
+    </button>
     <div class="cursor-blob" aria-hidden="true"></div>
+
+    <script>
+      function initThemeToggle() {
+        const btn = document.querySelector<HTMLButtonElement>('.theme-toggle');
+        if (!btn || btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', () => {
+          const next =
+            document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+          document.documentElement.dataset.theme = next;
+          localStorage.setItem('theme', next);
+        });
+      }
+      document.addEventListener('astro:page-load', initThemeToggle);
+      initThemeToggle();
+    </script>
 
     <script>
       // Cursor blob: lags slightly behind the pointer, squashes and stretches
@@ -82,11 +123,11 @@ const ogImageUrl = ogImage ? new URL(ogImage, base) : undefined;
         function tick() {
           const dx = tx - x;
           const dy = ty - y;
-          x += dx * 0.16;
-          y += dy * 0.16;
+          x += dx * 0.4; /* snappier — tracks close to the real pointer */
+          y += dy * 0.4;
 
           const speed = Math.hypot(dx, dy);
-          const stretch = Math.min(speed * 0.012, 0.55);
+          const stretch = Math.min(speed * 0.01, 0.4);
           const angle = Math.atan2(dy, dx);
 
           if (blob) {

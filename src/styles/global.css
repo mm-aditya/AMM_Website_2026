@@ -14,17 +14,31 @@
 }
 
 :root {
+  /* LIGHT (default): paper + soft warm ink */
   --bg: #fafaf7;
   --ink: #45413a; /* soft warm dark gray — never pure black */
   --muted: #9c978c;
-  --accent: #e8552d; /* the cursor blob; the only color on the site */
-  --line: #e6e3da; /* used sparingly: prose hr, blockquote only */
+  --accent: #2c4ad6; /* cool cobalt — the cursor mark on warm paper */
+  --line: #e6e3da;
+  --code-bg: #f1efe8;
+  --dim: 0.32; /* opacity of un-focused / faded rows */
 
   --col: 640px;
   --col-wide: 940px;
   --gutter: 1.5rem;
 
   --font: 'Satoshi', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* DARK: cool near-black + cool off-white, solid background */
+:root[data-theme='dark'] {
+  --bg: #0e1014; /* cool near-black — never pure black */
+  --ink: #e7eaf0; /* soft cool off-white — never pure white */
+  --muted: #888f9a;
+  --accent: #e8552d;
+  --line: #242a32;
+  --code-bg: #211e18;
+  --dim: 0.12; /* dark: white stands out more, so fade harder */
 }
 
 /* ---- base ---------------------------------------------------------------- */
@@ -38,6 +52,19 @@
 html {
   background: var(--bg);
   scrollbar-gutter: stable;
+}
+
+/* Dark only: fine film grain over the whole page — filmic texture on the
+   solid black, very low opacity. (No background gradient — solid by request.) */
+:root[data-theme='dark'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 body {
@@ -112,12 +139,38 @@ b {
 .site-name {
   margin: 0;
   font-size: 1rem;
-  font-weight: inherit; /* override the h1 UA default — bold is not in the system */
+  font-weight: inherit;
+}
+
+/* per-letter spans for the cursor-reactive weight; smooths the wght change */
+.site-name .nch {
+  transition: font-variation-settings 0.16s ease;
 }
 
 .subtitle {
   margin: 0.1rem 0 0;
   color: var(--muted);
+}
+
+.role-rotator {
+  display: inline-block;
+  transition: opacity 0.35s ease;
+}
+
+.clock {
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .bio {
@@ -177,14 +230,18 @@ b {
 
 /* hovering an actual row fades the rest back, focusing the one in question.
    :has scopes this to a real row hover, so the empty space beside the text
-   (where the preview collage sits) does not dim everything. */
-.index-scroll:has(.index-row:hover) .index-row {
-  opacity: 0.3;
-}
+   (where the preview collage sits) does not dim everything.
+   hover:hover scopes it to MOUSE devices — touch taps leave a sticky :hover
+   that would otherwise keep the fade active after scrolling on mobile. */
+@media (hover: hover) {
+  .index-scroll:has(.index-row:hover) .index-row {
+    opacity: var(--dim);
+  }
 
-/* same :has ancestor so this out-specifies the dimming rule above */
-.index-scroll:has(.index-row:hover) .index-row:hover {
-  opacity: 1;
+  /* same :has ancestor so this out-specifies the dimming rule above */
+  .index-scroll:has(.index-row:hover) .index-row:hover {
+    opacity: 1;
+  }
 }
 
 .row-top {
@@ -253,6 +310,16 @@ b {
   .home-footer {
     padding: 3rem 0 1.5rem;
   }
+
+  /* Mobile: continuous tiered fade. Brightness tracks each row's distance from
+     the focus line — the project nearest it is brightest, the rest tier off.
+     --f (0..1) is set per row by JS on scroll; opacity runs between --dim and 1.
+     No transition, so it tracks the scroll live. */
+  .index-row {
+    padding-bottom: 1.6rem;
+    opacity: calc(var(--dim) + (1 - var(--dim)) * var(--f, 1));
+    transition: none;
+  }
 }
 
 /* ---- hover collage (desktop-only enhancement) ------------------------------
@@ -312,6 +379,71 @@ b {
   will-change: transform;
 }
 
+/* Dark only: the blob becomes the one light in the room — a soft halo that
+   bleeds onto the page and blends additively. */
+:root[data-theme='dark'] .cursor-blob {
+  filter: blur(3px);
+  box-shadow:
+    0 0 22px 6px var(--accent),
+    0 0 48px 16px rgba(232, 85, 45, 0.45);
+  mix-blend-mode: screen;
+}
+
+/* ---- theme toggle: sun / moon, aligned to the column's right edge in line
+   with the name (directly above the year column) -------------------------- */
+
+.theme-toggle {
+  position: fixed;
+  top: calc(10vh - 1px);
+  /* right edge sits on the 640px text column's right edge; clamps on narrow */
+  left: min(calc(10vw + var(--col) - 20px), calc(100vw - 1.5rem - 20px));
+  z-index: 70;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.25s ease;
+}
+
+.theme-toggle:hover {
+  color: var(--ink);
+  transform: rotate(20deg);
+}
+
+.theme-toggle .icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-toggle .icon-moon {
+  display: none;
+}
+
+:root[data-theme='dark'] .theme-toggle .icon-sun {
+  display: none;
+}
+
+:root[data-theme='dark'] .theme-toggle .icon-moon {
+  display: block;
+}
+
+@media (max-width: 1000px) {
+  .theme-toggle {
+    top: 1.5rem;
+    left: auto;
+    right: 1.5rem;
+  }
+}
+
 .cursor-blob.alive {
   opacity: 1;
 }
@@ -319,6 +451,14 @@ b {
 @media (hover: none), (pointer: coarse) {
   .cursor-blob {
     display: none;
+  }
+}
+
+/* Where the blob stands in for the pointer, hide the system cursor entirely.
+   Scoped to fine-pointer devices so touch / trackpad-less setups keep theirs. */
+@media (hover: hover) and (pointer: fine) {
+  * {
+    cursor: none !important;
   }
 }
 
@@ -462,13 +602,13 @@ b {
 
 .prose code {
   font-size: 0.85em;
-  background: #f1efe8;
+  background: var(--code-bg);
   padding: 0.1em 0.35em;
   border-radius: 2px;
 }
 
 .prose pre {
-  background: #f1efe8;
+  background: var(--code-bg);
   padding: 1rem 1.25rem;
   overflow-x: auto;
   font-size: 0.85rem;

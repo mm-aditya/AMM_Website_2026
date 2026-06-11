@@ -61,7 +61,10 @@ const year = new Date().getFullYear();
   <main class="home">
     <header class="masthead">
       <h1 class="site-name">Aditya Manikashetti</h1>
-      <p class="subtitle">Director, creative director, creative technologist</p>
+      <p class="subtitle">
+        <span class="role-rotator" aria-hidden="true">Director</span>
+        <span class="sr-only">Director, creative director, creative technologist</span>
+      </p>
       <p class="bio">
         I make commercials and short films, and build the tools and workflows that hold
         post-production together. <a href="mailto:aditya.manikashetti@gmail.com">Email me</a> about
@@ -81,9 +84,7 @@ const year = new Date().getFullYear();
               data-slug={r.slug}
             >
               <span class="row-top">
-                <span class="row-title" transition:name={`title-${r.slug}`}>
-                  {r.data.title}
-                </span>
+                <span class="row-title">{r.data.title}</span>
                 <span class="row-year">{r.data.year}</span>
               </span>
               <span class="row-sub">
@@ -97,7 +98,7 @@ const year = new Date().getFullYear();
 
     <footer class="home-footer">
       <span>Aditya Manikashetti</span>
-      <span>© {year}</span>
+      <span><span class="clock" aria-hidden="true">--:--:--</span> · © {year}</span>
     </footer>
   </main>
 
@@ -168,9 +169,140 @@ const year = new Date().getFullYear();
       });
     }
 
-    // astro:page-load may fire before this module registers its listener on a
-    // fresh load, so also run immediately; the WeakSet makes re-runs harmless.
-    document.addEventListener('astro:page-load', initHoverPreview);
+    // ---- mobile: continuous tiered fade tied to scroll ------------------------
+    // No hover, no tap. Each row's brightness is a function of its distance from
+    // the focus line, so the project nearest it is brightest and the rest tier
+    // off smoothly as you scroll. Drives a per-row --f (0..1); CSS maps it to
+    // opacity between --dim and 1.
+    let mobileRaf = 0;
+
+    function updateMobileFade() {
+      const rows = document.querySelectorAll<HTMLElement>('.index-row');
+      if (!window.matchMedia('(max-width: 1000px)').matches) {
+        rows.forEach((r) => r.style.removeProperty('--f'));
+        return;
+      }
+      const focusY = window.innerHeight * 0.4;
+      const range = window.innerHeight * 0.6;
+      rows.forEach((r) => {
+        const rect = r.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const f = Math.max(0, 1 - Math.abs(center - focusY) / range);
+        r.style.setProperty('--f', (f * f).toFixed(3)); // squared = tighter tiers
+      });
+    }
+
+    function onScrollFade() {
+      cancelAnimationFrame(mobileRaf);
+      mobileRaf = requestAnimationFrame(updateMobileFade);
+    }
+
+    // ---- masthead name: letters thicken near the cursor -----------------------
+    // Rests at the site weight (550) and climbs toward ~760 as the pointer nears
+    // each letter. Desktop / fine-pointer only.
+    const NAME_BASE = 550;
+    const NAME_MAX = 760;
+    const NAME_RADIUS = 120;
+    let nameSpans: HTMLElement[] = [];
+    let nameCenters: { x: number; y: number }[] = [];
+
+    function cacheNameCenters() {
+      nameCenters = nameSpans.map((s) => {
+        const r = s.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      });
+    }
+
+    function initNameWeight() {
+      const name = document.querySelector<HTMLElement>('.site-name');
+      if (!name || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      if (!name.dataset.split) {
+        name.dataset.split = '1';
+        const text = name.textContent || '';
+        name.textContent = '';
+        nameSpans = [];
+        for (const ch of text) {
+          const s = document.createElement('span');
+          s.className = 'nch';
+          s.textContent = ch;
+          if (ch === ' ') s.style.whiteSpace = 'pre';
+          name.appendChild(s);
+          nameSpans.push(s);
+        }
+      }
+      cacheNameCenters();
+    }
+
+    document.addEventListener(
+      'mousemove',
+      (e) => {
+        if (!nameSpans.length) return;
+        for (let i = 0; i < nameSpans.length; i++) {
+          const c = nameCenters[i];
+          if (!c) continue;
+          const d = Math.hypot(e.clientX - c.x, e.clientY - c.y);
+          const t = Math.max(0, 1 - d / NAME_RADIUS);
+          const w = Math.round(NAME_BASE + (NAME_MAX - NAME_BASE) * t * t);
+          nameSpans[i].style.fontVariationSettings = `'wght' ${w}`;
+        }
+      },
+      { passive: true }
+    );
+
+    // ---- rotating role + live clock -------------------------------------------
+    const ROLES = ['Director', 'Creative Director', 'Creative Technologist'];
+    let roleTimer = 0;
+    let clockTimer = 0;
+
+    function initRoles() {
+      const el = document.querySelector<HTMLElement>('.role-rotator');
+      if (!el) return;
+      clearInterval(roleTimer);
+      let i = Math.max(0, ROLES.indexOf((el.textContent || '').trim()));
+      roleTimer = window.setInterval(() => {
+        el.style.opacity = '0';
+        window.setTimeout(() => {
+          i = (i + 1) % ROLES.length;
+          el.textContent = ROLES[i];
+          el.style.opacity = '1';
+        }, 350);
+      }, 2800);
+    }
+
+    function initClock() {
+      const el = document.querySelector<HTMLElement>('.clock');
+      if (!el) return;
+      clearInterval(clockTimer);
+      const update = () => {
+        el.textContent = new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        });
+      };
+      update();
+      clockTimer = window.setInterval(update, 1000);
+    }
+
+    function initMasthead() {
+      initNameWeight();
+      initRoles();
+      initClock();
+    }
+
+    document.addEventListener('astro:page-load', () => {
+      initHoverPreview();
+      updateMobileFade();
+      initMasthead();
+    });
     initHoverPreview();
+    updateMobileFade();
+    initMasthead();
+    window.addEventListener('scroll', onScrollFade, { passive: true });
+    window.addEventListener('resize', () => {
+      onScrollFade();
+      cacheNameCenters();
+    });
   </script>
 </BaseLayout>
