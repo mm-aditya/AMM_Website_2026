@@ -1,0 +1,28 @@
+---
+title: Realtime Previs Toolkit
+year: 2024
+role: Creative Technologist
+type: tech
+summary: A browser-based tool for blocking shots and previewing camera moves on set in real time.
+preview: ./preview.jpg
+hero: ./hero.jpg
+links:
+  - label: Project repository
+    url: https://example.com
+    note: Documentation and source
+draft: false
+---
+
+import screen1 from './screen-01.jpg'
+import screen2 from './screen-02.jpg'
+
+The toolkit grew out of frustration with existing previs software that required a dedicated workstation and a specialist operator. The goal was a tool that a director or DP could run on a tablet on set, with no installation and no licensing cost. It runs entirely in the browser using WebGL and a lightweight scene graph written in TypeScript. Camera data feeds in over WebSocket from a tracker mounted on the physical lens.
+
+The scene library covers the most common production scenarios: interior rooms, exteriors with a configurable sun position, and a neutral grey void for abstract blocking work. Geometry is low-poly by design. The point is not photorealistic preview but spatial understanding — knowing where the camera is relative to the actor and what the frame will contain at a given focal length.
+
+<ImageGrid cols={2}>
+  <Figure src={screen1} alt="Overhead schematic view of a room with camera and actor markers" caption="Plan view — camera blocking interface" />
+  <Figure src={screen2} alt="First-person camera preview with focal length controls visible" caption="Camera POV — 35mm equivalent, 1.78:1" />
+</ImageGrid>
+
+The WebSocket layer connects to a small Rust daemon that reads serial data from the tracker and broadcasts it over a local network. Latency from physical lens movement to viewport update is under 30ms on a standard office Wi-Fi connection. The tracker protocol is documented in the repository under `/docs/tracker-protocol.md`.

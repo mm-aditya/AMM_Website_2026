@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Video from '../../components/Video.astro';
+import ImageGrid from '../../components/ImageGrid.astro';
+import Figure from '../../components/Figure.astro';
+import LinkCard from '../../components/LinkCard.astro';
+
+export async function getStaticPaths() {
+  const projects = (await getCollection('work', ({ data }) => !data.draft)).sort(
+    (a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.year - a.data.year
+  );
+  return projects.map((project, i) => ({
+    params: { slug: project.id.replace(/\/index$/, '') },
+    props: {
+      project,
+      prev: projects[i - 1] ?? null,
+      next: projects[i + 1] ?? null,
+    },
+  }));
+}
+
+const { project, prev, next } = Astro.props;
+const { data } = project;
+const slug = project.id.replace(/\/index$/, '');
+const slugOf = (p: typeof project) => p.id.replace(/\/index$/, '');
+
+const { Content } = await render(project);
+const metaLine = [data.year, data.role, data.client].filter(Boolean).join(' · ');
+const ogImage = data.hero ? (await getImage({ src: data.hero, width: 1200 })).src : undefined;
+---
+
+<BaseLayout title={`${data.title} — Aditya Manikashetti`} description={data.summary} ogImage={ogImage}>
+  <main class="wrap">
+    <nav class="crumb meta-caps"><a href="/">Aditya Manikashetti</a></nav>
+
+    <article>
+      <header class="project-header">
+        <h1 class="project-title" transition:name={`title-${slug}`}>{data.title}</h1>
+        <p class="project-meta meta-caps">{metaLine}</p>
+        <p class="project-summary">{data.summary}</p>
+      </header>
+
+      {
+        data.videoId ? (
+          <div class="project-hero">
+            <Video id={data.videoId} title={data.title} />
+          </div>
+        ) : data.hero ? (
+          <div class="project-hero">
+            <Image
+              src={data.hero}
+              alt={data.title}
+              widths={[760, 1200, 1600]}
+              sizes="(max-width: 980px) 100vw, 940px"
+            />
+          </div>
+        ) : null
+      }
+
+      <div class="prose">
+        <Content components={{ Video, ImageGrid, Figure, LinkCard }} />
+      </div>
+
+      {
+        data.links.length > 0 && (
+          <div class="project-links">
+            {data.links.map((l) => (
+              <LinkCard url={l.url} label={l.label} note={l.note} />
+            ))}
+          </div>
+        )
+      }
+    </article>
+
+    <footer class="project-footer">
+      {prev ? <a href={`/work/${slugOf(prev)}/`}>← {prev.data.title}</a> : <span></span>}
+      <a href="/">Index</a>
+      {next ? <a href={`/work/${slugOf(next)}/`}>{next.data.title} →</a> : <span></span>}
+    </footer>
+  </main>
+</BaseLayout>

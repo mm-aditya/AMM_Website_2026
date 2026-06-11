@@ -1,0 +1,30 @@
+---
+title: Invisible VFX Pipeline
+year: 2024
+role: Creative Director
+type: writing
+summary: A review workflow for invisible VFX that keeps the supervisor, editor, and client on the same page.
+preview: ./preview.jpg
+draft: false
+links: []
+---
+
+import diagram from './diagram.jpg'
+
+Most invisible VFX work fails in review, not in execution. The compositor delivers a clean wire removal. The editor cuts away before the reviewer registers it. Three rounds later, the same shot comes back with a note that was already addressed. The problem is not the work — it is the review process.
+
+## The Core Issue
+
+Standard review tools are designed for visible effects. They assume the reviewer can see what changed. For invisible work — wire removes, sky replacements, rig removals, beauty work — there is nothing to see when the shot is working. The reviewer needs a way to compare the composite against the clean plate, not just watch the finished frame.
+
+We built a lightweight review protocol on top of existing tools. Each shot in review is accompanied by a side-by-side export: the composite on the left, the original plate on the right, with a synchronized playhead. The compositor generates this automatically as part of the delivery package. Review notes attach to the specific version, not the shot in general.
+
+<Figure src={diagram} alt="Flowchart showing the review pipeline from compositor to editor to client sign-off" caption="Review pipeline — from compositor delivery to client sign-off" />
+
+## What Changed
+
+The main change was in how the supervisor communicates status to the editor. Previously, status lived in a spreadsheet. Now each shot has a status tag that appears directly in the edit timeline via a custom Resolve plugin. The editor can see at a glance which shots are approved, which are in revision, and which are waiting for a clean plate from production.
+
+The result was a 40% reduction in revision rounds on the first three productions that used the protocol. More importantly, it reduced the number of shots that reached color with unresolved notes — a problem that had previously caused delays at the last stage of post. The protocol is documented here as a reference for future productions and for any team that wants to adapt it.
+
+

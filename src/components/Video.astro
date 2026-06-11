@@ -1,0 +1,49 @@
+---
+interface Props {
+  id?: string;
+  src?: string;
+  title?: string;
+  loop?: boolean;
+}
+
+const { id, src, title = "Video", loop = false } = Astro.props;
+
+let embedUrl: string | undefined;
+
+if (id) {
+  const colonIdx = id.indexOf(":");
+  if (colonIdx !== -1) {
+    const provider = id.slice(0, colonIdx);
+    const assetId = id.slice(colonIdx + 1);
+    if (provider === "gumlet") {
+      embedUrl = `https://play.gumlet.io/embed/${assetId}`;
+    } else if (provider === "vimeo") {
+      embedUrl = `https://player.vimeo.com/video/${assetId}?dnt=1&title=0&byline=0&portrait=0`;
+    } else if (provider === "youtube") {
+      embedUrl = `https://www.youtube-nocookie.com/embed/${assetId}?rel=0`;
+    }
+  }
+}
+---
+
+{id && embedUrl && (
+  <div class="video-embed">
+    <iframe
+      src={embedUrl}
+      title={title}
+      loading="lazy"
+      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+      allowfullscreen
+    />
+  </div>
+)}
+
+{!id && src && (
+  <div class="video-embed">
+    {loop ? (
+      <video autoplay muted loop playsinline preload="metadata" src={src} />
+    ) : (
+      <video controls playsinline preload="metadata" src={src} />
+    )}
+  </div>
+)}

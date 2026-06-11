@@ -1,0 +1,28 @@
+---
+title: The Long Way Home
+year: 2025
+role: Director
+client: Sample Client
+type: film
+summary: A short documentary following a seasonal migration route through the high desert.
+preview: ./preview.jpg
+hero: ./hero.jpg
+videoId: "vimeo:76979871"
+featured: true
+links: []
+draft: false
+---
+
+import still1 from './still-01.jpg'
+import still2 from './still-02.jpg'
+
+The film began with a single image: a line of figures crossing a salt flat at dusk. We spent three weeks in the field before shooting a frame, walking the route ourselves and mapping where the light changed. The concept was to stay close to the physical reality of the journey and resist the pull toward metaphor.
+
+The camera work is mostly handheld, cut close to the subjects. We chose lenses that flatten compression slightly, which gives the landscape an accurate sense of scale without making it feel grand. Every location was scouted at the time of day we intended to shoot.
+
+<ImageGrid cols={2}>
+  <Figure src={still1} alt="Two figures walking across a cracked salt flat at golden hour" caption="Day 4 — salt flat crossing, 17:40" />
+  <Figure src={still2} alt="Close-up of worn boots on rocky desert ground" caption="Detail shot — late afternoon, high desert" />
+</ImageGrid>
+
+The post pipeline used Resolve for color and a custom Python script to batch the noise reduction passes. We graded on a reference monitor calibrated to P3 D65 and delivered three masters: cinema, streaming, and broadcast. The VFX work is minimal — a handful of wire removals and one sky replacement in a shot where a vapor trail crossed the frame at the wrong moment. The goal was for none of it to be visible.

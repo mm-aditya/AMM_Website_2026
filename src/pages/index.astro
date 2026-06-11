@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
+
+const projects = (await getCollection('work', ({ data }) => !data.draft)).sort(
+  (a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.year - a.data.year
+);
+
+const rows = await Promise.all(
+  projects.map(async (p) => ({
+    slug: p.id.replace(/\/index$/, ''),
+    data: p.data,
+    previewSrc: p.data.preview ? (await getImage({ src: p.data.preview, width: 720 })).src : null,
+  }))
+);
+---
+
+<BaseLayout title="Aditya Manikashetti">
+  <main class="wrap">
+    <header class="masthead">
+      <p class="role-line meta-caps">Director · Creative Director · Creative Technologist</p>
+      <h1 class="site-name">Aditya Manikashetti</h1>
+      <p class="bio">
+        I direct films and build the technology that makes them. My work moves between
+        commercials, short film, and post-production VFX — and the tools and workflows
+        that hold all of it together.
+      </p>
+      <p class="contact">
+        <a href="mailto:krishna@penukonda.me">Email</a>
+      </p>
+    </header>
+
+    <section class="index" aria-label="Selected work">
+      <p class="index-heading meta-caps">Selected work</p>
+      {
+        rows.map((r) => (
+          <a class="index-row" href={`/work/${r.slug}/`} data-preview={r.previewSrc}>
+            <span class="row-top">
+              <span class="row-title" transition:name={`title-${r.slug}`}>
+                {r.data.title}
+              </span>
+              <span class="row-meta meta-caps">
+                {r.data.role} · {r.data.year}
+              </span>
+            </span>
+            {r.data.summary && <span class="row-summary">{r.data.summary}</span>}
+          </a>
+        ))
+      }
+    </section>
+
+    <footer class="site-footer meta-caps">Aditya Manikashetti · {new Date().getFullYear()}</footer>
+  </main>
+
+  <div class="hover-preview" aria-hidden="true"><img alt="" /></div>
+
+  <script>
+    function initHoverPreview() {
+      const box = document.querySelector('.hover-preview');
+      const img = box?.querySelector('img');
+      if (!box || !img || !window.matchMedia('(hover: hover)').matches) return;
+
+      document.querySelectorAll<HTMLAnchorElement>('.index-row').forEach((row) => {
+        row.addEventListener('mouseenter', () => {
+          const src = row.dataset.preview;
+          if (!src) {
+            box.classList.remove('visible');
+            return;
+          }
+          if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+          box.classList.add('visible');
+        });
+        row.addEventListener('mouseleave', () => box.classList.remove('visible'));
+      });
+    }
+
+    document.addEventListener('astro:page-load', initHoverPreview);
+  </script>
+</BaseLayout>

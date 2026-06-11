@@ -1,0 +1,14 @@
+---
+interface Props {
+  url: string;
+  label: string;
+  note?: string;
+}
+
+const { url, label, note } = Astro.props;
+---
+
+<a class="link-card" href={url} target="_blank" rel="noopener">
+  <span class="link-card-label">{label} ↗</span>
+  {note && <span class="link-card-note">{note}</span>}
+</a>
