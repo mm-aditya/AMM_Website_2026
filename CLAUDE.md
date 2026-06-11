@@ -80,12 +80,16 @@ No marketing language, no superlatives, no "passionate", no exclamation marks.
 ## Site-level facts
 
 - Stack: Astro 6 (static) + MDX. Styles live in `src/styles/global.css` (design tokens at the top).
-- Design system: ONE typeface (Satoshi, self-hosted in `public/fonts/`), TWO colors (ink + muted).
-  Bold ink = important, muted = secondary. Spacing does the layout — never add borders, extra
-  colors, font sizes, or uppercase labels. When in doubt, remove information rather than style it.
-- Index rows render as: bold title, then one muted line = `{summary} {role}, {year}.` — so write
-  every `summary` as a sentence fragment that reads naturally before the role, e.g.
-  "A short documentary following a seasonal migration route through the high desert."
+- Design system: ONE typeface (Satoshi, self-hosted in `public/fonts/`), and exactly TWO text
+  styles: style 1 = bold ink (name, bio, work titles), style 2 = regular muted (everything else).
+  Never add borders, extra colors, font sizes, or uppercase labels. When in doubt, remove
+  information rather than style it.
+- Homepage is a fixed composition anchored at 20% left / 20% top: masthead, then the work list
+  scrolling inside its own region (fade-out at the bottom, hairline scrollbar), with a muted
+  name/© line pinned to the bottom edge. Below 1000px it falls back to normal page flow.
+- Index rows render as: bold title with the year right-aligned, then one muted line =
+  `{summary} {role}.` — so write every `summary` as a sentence that reads naturally before the
+  role, e.g. "A short documentary following a seasonal migration route through the high desert."
 - Homepage and project template: `src/pages/index.astro`, `src/pages/work/[slug].astro`.
 - Schema definition: `src/content.config.ts`.
 - Index sort order: `featured: true` first, then year descending.
