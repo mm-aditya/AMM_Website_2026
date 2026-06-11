@@ -168,7 +168,9 @@ b {
 .index-row {
   display: block;
   text-decoration: none;
-  margin-bottom: 1.4rem;
+  /* gap lives inside the row as padding, not as margin, so adjacent rows'
+     hover targets touch — no dead zone between them to make the fade flicker */
+  padding-bottom: 1.4rem;
   max-width: var(--col);
   transition: opacity 0.2s ease;
 }
