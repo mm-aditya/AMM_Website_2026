@@ -100,7 +100,8 @@ b {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 10vh 1.5rem 0 10vw;
+  /* equal 10% margin on top, left and bottom; nothing bleeds past it */
+  padding: 10vh 1.5rem 10vh 10vw;
 }
 
 .masthead {
@@ -169,6 +170,16 @@ b {
   text-decoration: none;
   margin-bottom: 1.4rem;
   max-width: var(--col);
+  transition: opacity 0.2s ease;
+}
+
+/* hovering any row fades the rest back, focusing the one in question */
+.index-scroll:hover .index-row {
+  opacity: 0.3;
+}
+
+.index-scroll:hover .index-row:hover {
+  opacity: 1;
 }
 
 .row-top {
@@ -204,10 +215,9 @@ b {
   justify-content: space-between;
   gap: 1.5rem;
   color: var(--muted);
-  /* span the full viewport width with a 20px reserve on each edge */
-  margin-left: -10vw;
-  margin-right: -1.5rem;
-  padding: 20px;
+  /* sits inside the margins, aligned to the work column */
+  max-width: var(--col);
+  padding-top: 1.5rem;
 }
 
 /* Narrow screens: normal document flow, no internal scroll, no fixed frame */
@@ -236,7 +246,6 @@ b {
   }
 
   .home-footer {
-    margin-left: 0;
     padding: 3rem 0 1.5rem;
   }
 }

@@ -33,7 +33,7 @@ const ogImage = data.hero ? (await getImage({ src: data.hero, width: 1200 })).sr
 
 <BaseLayout title={`${data.title} — Aditya Manikashetti`} description={data.summary} ogImage={ogImage}>
   <main class="project">
-    <nav class="crumb"><a href="/">← Aditya Manikashetti</a></nav>
+    <nav class="crumb"><a href="/" aria-label="Back to home">←</a></nav>
 
     <article>
       <header class="project-header">
