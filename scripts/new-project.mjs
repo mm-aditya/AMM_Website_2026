@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 
-const name = process.argv[2];
+const name = process.argv.slice(2).join(' ');
 
 if (!name || !name.trim()) {
   console.error('Error: please provide a project name.');
@@ -41,11 +41,11 @@ title: ${name.trim()}
 year: ${year}
 role: Director
 type: film
-summary: TODO
+summary: TODO — one sentence that reads naturally before the role, e.g. "A short film about X."
+previews: ["./preview.jpg"]
 draft: true
 # client: ""
 # featured: false
-# preview: ./preview.jpg
 # hero: ./hero.jpg
 # videoId: "vimeo:XXXXXXX"
 # links:
@@ -60,6 +60,7 @@ draft: true
   <ImageGrid cols={2}>...</ImageGrid>  — responsive image grid; wrap Figure children inside
   <Figure src={importedImg} alt="" caption="" /> — single image with optional caption
   <LinkCard url="" label="" note="" /> — external link card with label and optional note
+  Chapters: plain ## headings. Section breaks: ---. See CLAUDE.md for the full manual.
 */}
 `;
 
@@ -67,4 +68,5 @@ const filePath = path.join(dir, 'index.mdx');
 fs.writeFileSync(filePath, stub, 'utf8');
 
 console.log(`Created: ${filePath}`);
-console.log('Add preview.jpg (960×540) and hero.jpg (1600×900), set draft: false when ready.');
+console.log('Next: add preview.jpg (960×540) into the folder, write the body,');
+console.log('set draft: false, then run "npm run check" to validate before pushing.');

@@ -1,107 +1,144 @@
-# Aditya Manikashetti — Portfolio Site: Agent Operating Manual
+# Aditya Manikashetti — Portfolio: Agent Operating Manual
 
-This is a static Astro site. **Git is the CMS**: every push to `main` auto-deploys to
-Cloudflare Pages in about a minute. To publish or edit work, you only ever touch
-`src/content/work/` — never the layout, styles, or page templates unless explicitly asked.
+This is Aditya's portfolio site (Astro 6, static, MDX). **Git is the CMS**: every push to
+`main` deploys to Cloudflare Pages. Content lives in `src/content/work/` — one folder per
+project. To publish or edit work you ONLY touch that directory. Never edit layouts, styles,
+components or pages unless Aditya explicitly asks for a design change.
 
-## Adding a project (the only workflow that matters)
+Repo: https://github.com/mm-aditya/AMM_Website_2026
 
-1. Scaffold: `npm run new "Project Name"` → creates `src/content/work/project-name/index.mdx` with `draft: true`.
-2. Fill in the frontmatter and write the body (see schema and components below).
-3. Add images to the same folder:
-   - hover-collage media, listed in `previews` — 1–4 items, images (≈960×540) and/or short muted
-     mp4/webm loops (≤ 5 MB, ≤ 4 s). One item shows centered; several scatter into a loose collage.
-   - `hero.jpg` — 1600×900, the page's lead image (skip if `videoId` is set — video takes its place; if both are set, video leads and hero becomes the link-sharing image).
-   - any body images (stills, screenshots, diagrams) — ≤ 1600px wide, JPG/PNG, keep each under 1 MB. Astro optimizes at build.
+## The workflow: adding a project
+
+1. `npm run new "Project Name"` → scaffolds `src/content/work/project-name/index.mdx` with
+   `draft: true` and the full frontmatter template.
+2. Fill the frontmatter (schema below) and write the body (components below).
+3. Drop media files into the same folder (rules below).
 4. Set `draft: false`.
-5. Verify locally if possible: `npm run build` (schema errors fail loudly here, never in production).
-6. Publish: `git add -A && git commit -m "Add project: <name>" && git push`.
+5. **`npm run check`** — the content validator. Fix everything it reports.
+6. `npm run build` — must pass (schema + validator + build all run).
+7. Publish: `git add -A && git commit -m "Add project: <name>" && git push`. Live in ~1 min.
 
-## Frontmatter schema (validated at build — extra/wrong fields fail the build)
+Editing a project = editing its `index.mdx`, then steps 5–7. Unpublishing = `draft: true`.
+
+## Frontmatter schema (zod-validated at build; unknown fields fail the build)
 
 ```yaml
 ---
-title: "Project Name"          # required
-year: 2026                     # required, number
-role: "Director"               # required — what Aditya did. Front "Director", "Creative Director", or "Creative Technologist" where truthful
-client: "Studio / brand"       # optional
-type: film                     # required: film | tech | writing
-summary: "One line shown on the homepage row and used as the page description."  # required
-previews: ["./preview.jpg", "./still-01.jpg", "./loop.mp4"]  # hover collage, 1-4 mixed media; strongly encouraged
-featured: false                # optional — true pins it to the top of the index
-hero: ./hero.jpg               # optional
-videoId: "vimeo:76979871"      # optional — provider-prefixed: gumlet:ASSETID | vimeo:ID | youtube:ID
-links:                         # optional — external links shown at the page bottom
+title: "Project Name"            # required
+year: 2026                       # required, number, no quotes
+role: "Director"                 # required — Director | Creative Director | Creative Technologist (whichever is truthful)
+client: "Studio / brand"         # optional
+type: film                       # required: film | tech | writing
+summary: "One sentence that reads naturally before the role tag."   # required — see voice rules
+previews: ["./preview.jpg", "./loop.mp4"]   # hover collage, 1–4 items, MUST be this one-line inline form
+featured: false                  # optional — true pins the project to the top of the index
+hero: ./hero.jpg                 # optional — page lead image
+videoId: "vimeo:76979871"        # optional — provider-prefixed: gumlet:ID | vimeo:ID | youtube:ID
+links:                           # optional — external links, rendered at the page bottom
   - { label: "Live site", url: "https://…", note: "Short context" }
-draft: true                    # true = excluded from the built site
+draft: true                      # true = excluded from the site entirely
 ---
 ```
 
+How the homepage row renders: **title** (ink) with the year right-aligned, then one muted
+line = `{summary} {role}.` — so ALWAYS write `summary` as a sentence that reads naturally
+with the role appended after it, e.g. "A short documentary following a seasonal migration
+route through the high desert." → "…high desert. Director."
+
+Hero logic: `videoId` set → video leads the page and `hero` becomes the link-sharing (OG)
+image. Only `hero` set → image leads. Neither → page starts with the text (fine for writing).
+
+## Media rules
+
+| Media | Where | Spec |
+|---|---|---|
+| Hover previews (images) | project folder, listed in `previews` | ~960×540 JPG, < 1.5 MB each |
+| Hover previews (loops) | project folder, listed in `previews` | mp4/webm, muted, 2–4 s, ≤ 5 MB, ~640px wide |
+| Page hero | project folder, `hero:` | 1600×900 JPG, < 1.5 MB |
+| Body images (stills, screenshots, diagrams) | project folder, imported in MDX | ≤ 1600px wide, < 1.5 MB each |
+| Full films / reels | **Gumlet** (never the repo) | upload there, reference `videoId: "gumlet:ASSETID"` |
+
+- NEVER commit a full film to the repo. The validator hard-fails any file over 20 MB.
+- 1 preview = centered and level. 2–4 previews = a horizontal strip with small gaps and a
+  gentle alternating vertical offset. More than 4 gets cramped (validator warns).
+- Make a preview loop from footage with ffmpeg:
+  `ffmpeg -y -i input.mp4 -vf "scale=640:-2" -t 3 -an -c:v libx264 -pix_fmt yuv420p -movflags +faststart loop.mp4`
+  or a slow push-in from a still:
+  `ffmpeg -y -loop 1 -i still.jpg -vf "scale=1280:720,zoompan=z='1+0.10*in/75':d=75:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=640x360:fps=30" -t 2.5 -an -c:v libx264 -pix_fmt yuv420p -movflags +faststart loop.mp4`
+
 ## Writing the body (MDX)
 
-Plain markdown is fully styled — paragraphs, `##` subheadings, lists, blockquotes, code.
-Four components are **auto-available without imports**:
+Plain markdown is fully styled. Four components are auto-available — do NOT import them.
+Local images used in the body DO need an import.
 
 ```mdx
-<Video id="gumlet:abc123" />                    {/* or vimeo:/youtube:; full-width 16:9 player */}
-<Video src="https://…/clip.mp4" loop />          {/* direct file; loop = muted autoplay */}
-
-import still1 from './still-01.jpg';             {/* local images DO need an import */}
+import still1 from './still-01.jpg';
 import still2 from './still-02.jpg';
 
+Opening paragraph: what it is, who for, what was made.
+
+## Chapter name
+
+<Video id="gumlet:abc123" />                 {/* or vimeo:/youtube: — 16:9 player */}
+<Video src="/clip.mp4" loop />               {/* direct file; loop = muted autoplay */}
+
 <ImageGrid cols={2}>
-  <Figure src={still1} alt="Describe the frame" />
+  <Figure src={still1} alt="Describe the frame" caption="Optional caption" />
   <Figure src={still2} alt="Describe the frame" />
 </ImageGrid>
 
-<Figure src={still1} alt="…" caption="Optional caption under the image." />
+---
 
-<LinkCard url="https://…" label="Case study" note="Optional second line" />
+## Credits
+
+Director — Aditya Manikashetti. Production — …
 ```
 
-Page anatomy (the template handles all of this automatically):
-title → meta line (year · role · client) → summary → hero video/image → your MDX body → links → prev/next.
-
-### Per-type conventions
-- **film**: `videoId` as hero, 2–3 short paragraphs (concept, craft, post/VFX), one ImageGrid of stills.
-- **tech**: hero screenshot, paragraphs explaining what it does and why, screenshots in ImageGrid. External links (live site, repo) go in frontmatter `links` — they render at the page bottom automatically. Use an inline `<LinkCard>` in the body only for a mid-article reference; never duplicate a frontmatter link there.
-- **writing**: mostly prose with `##` subheadings, Figures for diagrams/infographics. No hero needed.
+Structure conventions (the template renders: back arrow → title → meta → summary → hero →
+body → links → prev/next):
+- **Chapters** are plain `##` headings — they render as muted labels with generous air,
+  the same voice as "Work" on the home page. Use them to section bigger projects
+  (e.g. Concept / Process / Stills / Credits). Small projects need no chapters at all.
+- `---` renders as a short hairline divider — use it for major section breaks.
+- **film**: videoId as hero, 2–3 short paragraphs (concept, craft, post/VFX), an ImageGrid
+  of stills. End larger films with a Credits chapter.
+- **tech**: hero screenshot, what it does and why, screenshots in ImageGrid. External links
+  go in frontmatter `links` (they render at the bottom) — never duplicate them as inline
+  LinkCards.
+- **writing**: mostly prose with `##` chapters and Figures for diagrams. No hero needed.
 
 ### Voice
 Restrained and concrete. Short sentences. Say what was made, how, and what was hard.
-No marketing language, no superlatives, no "passionate", no exclamation marks.
+No marketing language, no superlatives, no "passionate", no exclamation marks, no "delve".
 
-## Video hosting
+## Design rules (relevant only if Aditya asks for design work)
 
-- Full films/reels → upload to **Gumlet** (free plan: 100 min stored, 250 GB/mo bandwidth),
-  copy the asset ID, reference as `videoId: "gumlet:ASSETID"`. Vimeo/YouTube IDs also work.
-- Never commit video files to the repo (Cloudflare Pages caps files at 25 MB and the repo would bloat).
-- v2 upgrade path (not set up yet): Cloudflare R2 bucket for small muted hover-loop clips.
+- ONE typeface: Satoshi variable (`public/fonts/`), ONE weight: 550, set once on `body`.
+- Hierarchy is COLOR only: `--ink` (soft warm dark gray — never pure black) for what
+  matters; `--muted` for everything else. NO bold, no borders, no uppercase labels, no
+  extra font sizes. When something feels cluttered, remove information — don't style it.
+- The single pop of color is the cursor blob (`--accent`, BaseLayout). No color anywhere else.
+- Frame: everything anchors at 10vw left / 10vh top / 10vh bottom; nothing renders outside
+  the margins. Home: masthead → "Work" list scrolling in its own masked region → muted
+  footer line inside the frame. Project pages share the frame; the back arrow sits exactly
+  where the name sits on home. Text column 640px; media keeps the left edge, extends right
+  to 940px max. Below 1000px everything falls back to normal flow.
 
-## Site-level facts
+## Safety nets (what stops a bad commit going live)
 
-- Stack: Astro 6 (static) + MDX. Styles live in `src/styles/global.css` (design tokens at the top).
-- Design system: ONE typeface (Satoshi variable, self-hosted in `public/fonts/`) at ONE weight —
-  550, set once on `body` — hierarchy comes from COLOR only: style 1 = soft dark ink `--ink`
-  (name, bio, work titles, prose), style 2 = muted `--muted` (subtitle, headings/labels, row
-  info, years, captions). NO bold anywhere, no pure black, no borders, no extra font sizes, no
-  uppercase labels. When in doubt, remove information rather than style it.
-- The single pop of color is the rubbery cursor blob (`--accent`, implemented in BaseLayout).
-  Do not introduce color anywhere else.
-- Homepage is a fixed composition anchored at 10% left / 10% top: masthead, then the work list
-  scrolling inside its own region (fade-out at the bottom, hairline scrollbar at the far right
-  of the screen), with a muted name/© line pinned to the bottom edge. The hover collage appears
-  centred in the space right of the list, at the hovered row's vertical position. Below 1000px
-  it falls back to normal page flow.
-- Project pages share the same frame: anchored 10vw left / 10vh top, fully left-aligned. The
-  "← Aditya Manikashetti" back link sits exactly where the name sits on home. Text column is
-  640px; media keeps the same left edge and extends right up to 940px. Chapters are muted `##`
-  headings with generous air above; `---` renders as a short hairline section divider; end a
-  big project with a Credits chapter (benji-style acknowledgements).
-- Index rows render as: bold title with the year right-aligned, then one muted line =
-  `{summary} {role}.` — so write every `summary` as a sentence that reads naturally before the
-  role, e.g. "A short documentary following a seasonal migration route through the high desert."
-- Homepage and project template: `src/pages/index.astro`, `src/pages/work/[slug].astro`.
-- Schema definition: `src/content.config.ts`.
-- Index sort order: `featured: true` first, then year descending.
-- Production domain: set `site` in `astro.config.mjs` when the real domain is wired.
+1. `npm run check` (also runs automatically before every build, locally and on Cloudflare):
+   verifies every `previews` file exists, media types/sizes, inline-array form, no TODO
+   summaries on published projects, videoId format, nothing huge in the repo.
+2. Astro's zod schema: wrong/missing/unknown frontmatter fields fail the build.
+3. The build itself fails loudly on broken imports or missing hero files — a failed build
+   never deploys; the live site stays on the last good version.
+
+If a build fails, read the error: it names the project and field. Fix, re-run `npm run build`.
+
+## File map (for orientation, not modification)
+
+- `src/content/work/<slug>/index.mdx` — all content lives here
+- `src/content.config.ts` — schema | `scripts/validate-content.mjs` — validator
+- `src/pages/index.astro` — home | `src/pages/work/[slug].astro` — project template
+- `src/styles/global.css` — entire design system | `src/layouts/BaseLayout.astro` — head/meta/blob
+- `astro.config.mjs` — set `site` to the real domain when it's wired
