@@ -35,10 +35,74 @@ const ogImageUrl = ogImage ? new URL(ogImage, base) : undefined;
     <meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
     <meta name="generator" content={Astro.generator} />
     <link rel="preload" href="/fonts/satoshi-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/satoshi-700.woff2" as="font" type="font/woff2" crossorigin />
     <ClientRouter />
   </head>
   <body>
     <slot />
+    <div class="cursor-blob" aria-hidden="true"></div>
+
+    <script>
+      // Cursor blob: lags slightly behind the pointer, squashes and stretches
+      // along its direction of travel like a rubbery drop.
+      let raf = 0;
+      let listenersBound = false;
+      let blob: HTMLElement | null = null;
+      let tx = -100,
+        ty = -100,
+        x = -100,
+        y = -100,
+        seen = false;
+
+      function initBlob() {
+        cancelAnimationFrame(raf);
+        blob = document.querySelector<HTMLElement>('.cursor-blob');
+        if (!blob || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+        if (seen) blob.classList.add('alive');
+
+        if (!listenersBound) {
+          listenersBound = true;
+          document.addEventListener(
+            'mousemove',
+            (e) => {
+              tx = e.clientX;
+              ty = e.clientY;
+              if (!seen) {
+                seen = true;
+                x = tx;
+                y = ty;
+                blob?.classList.add('alive');
+              }
+            },
+            { passive: true }
+          );
+          document.addEventListener('mouseleave', () => blob?.classList.remove('alive'));
+          document.addEventListener('mouseenter', () => seen && blob?.classList.add('alive'));
+        }
+
+        function tick() {
+          const dx = tx - x;
+          const dy = ty - y;
+          x += dx * 0.16;
+          y += dy * 0.16;
+
+          const speed = Math.hypot(dx, dy);
+          const stretch = Math.min(speed * 0.012, 0.55);
+          const angle = Math.atan2(dy, dx);
+
+          if (blob) {
+            blob.style.transform =
+              `translate(${x - 9}px, ${y - 9}px) rotate(${angle}rad) ` +
+              `scale(${1 + stretch}, ${1 / (1 + stretch)})`;
+          }
+          raf = requestAnimationFrame(tick);
+        }
+        raf = requestAnimationFrame(tick);
+      }
+
+      // astro:page-load may fire before this module registers its listener on a
+      // fresh load, so also run immediately; initBlob is idempotent.
+      document.addEventListener('astro:page-load', initBlob);
+      initBlob();
+    </script>
   </body>
 </html>

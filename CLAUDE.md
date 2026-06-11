@@ -80,13 +80,17 @@ No marketing language, no superlatives, no "passionate", no exclamation marks.
 ## Site-level facts
 
 - Stack: Astro 6 (static) + MDX. Styles live in `src/styles/global.css` (design tokens at the top).
-- Design system: ONE typeface (Satoshi, self-hosted in `public/fonts/`), and exactly TWO text
-  styles: style 1 = bold ink (name, bio, work titles), style 2 = regular muted (everything else).
-  Never add borders, extra colors, font sizes, or uppercase labels. When in doubt, remove
-  information rather than style it.
-- Homepage is a fixed composition anchored at 20% left / 20% top: masthead, then the work list
-  scrolling inside its own region (fade-out at the bottom, hairline scrollbar), with a muted
-  name/© line pinned to the bottom edge. Below 1000px it falls back to normal page flow.
+- Design system: ONE typeface (Satoshi regular 400, self-hosted in `public/fonts/`) at ONE
+  weight — hierarchy comes from COLOR only: style 1 = soft dark ink `--ink` (name, bio, work
+  titles, prose), style 2 = muted `--muted` (subtitle, headings/labels, row info, years, captions).
+  NO bold anywhere, no pure black, no borders, no extra font sizes, no uppercase labels.
+  When in doubt, remove information rather than style it.
+- The single pop of color is the rubbery cursor blob (`--accent`, implemented in BaseLayout).
+  Do not introduce color anywhere else.
+- Homepage is a fixed composition anchored at 10% left / 10% top: masthead, then the work list
+  scrolling inside its own region (fade-out at the bottom, hairline scrollbar at the far right
+  of the screen), with a muted name/© line pinned to the bottom edge. The hover preview appears
+  at the hovered row's vertical position. Below 1000px it falls back to normal page flow.
 - Index rows render as: bold title with the year right-aligned, then one muted line =
   `{summary} {role}.` — so write every `summary` as a sentence that reads naturally before the
   role, e.g. "A short documentary following a seasonal migration route through the high desert."

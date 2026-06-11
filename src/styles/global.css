@@ -30,8 +30,9 @@
 
 :root {
   --bg: #fafaf7;
-  --ink: #16140f;
-  --muted: #98948a;
+  --ink: #45413a; /* soft warm dark gray — never pure black */
+  --muted: #9c978c;
+  --accent: #e8552d; /* the cursor blob; the only color on the site */
   --line: #e6e3da; /* used sparingly: prose hr, blockquote only */
 
   --col: 640px;
@@ -58,7 +59,7 @@ body {
   margin: 0;
   font-family: var(--font);
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.35;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -90,7 +91,7 @@ a:hover {
 
 strong,
 b {
-  font-weight: 700;
+  font-weight: 500; /* emphasis stays gentle — bold is not part of the system */
 }
 
 .wrap {
@@ -104,16 +105,16 @@ b {
 }
 
 /* ---- home: left-anchored composition, work list scrolls internally --------
-   Exactly two text styles on this screen:
-   style 1 = bold ink   (name, bio, work titles)
-   style 2 = muted 400  (subtitle, "Work", row info, years, footer)
+   Exactly two text styles on this screen — SAME weight, different color:
+   style 1 = regular ink   (name, bio, work titles)
+   style 2 = regular muted (subtitle, "Work", row info, years, footer)
 ----------------------------------------------------------------------------- */
 
 .home {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 20vh 1.5rem 0 20vw;
+  padding: 10vh 1.5rem 0 10vw;
 }
 
 .masthead {
@@ -124,7 +125,7 @@ b {
 .site-name {
   margin: 0;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 400; /* override the h1 UA default — bold is not in the system */
 }
 
 .subtitle {
@@ -133,14 +134,12 @@ b {
 }
 
 .bio {
-  margin: 1.5rem 0 0;
+  margin: 1.4rem 0 0;
   max-width: 46ch;
-  font-weight: 700;
 }
 
 .index {
   margin-top: clamp(2.5rem, 6vh, 4rem);
-  max-width: var(--col);
   flex: 1;
   min-height: 0;
   display: flex;
@@ -160,6 +159,8 @@ b {
   min-height: 0;
   overflow-y: auto;
   padding-bottom: 6rem;
+  /* scroll container spans the remaining width so the scrollbar sits at the
+     far right of the screen, well away from the year column */
   mask-image: linear-gradient(to bottom, #000 calc(100% - 90px), transparent);
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
@@ -180,23 +181,21 @@ b {
 .index-row {
   display: block;
   text-decoration: none;
-  margin-bottom: 1.7rem;
+  margin-bottom: 1.4rem;
+  max-width: var(--col);
 }
 
 .row-top {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.row-title {
-  font-weight: 700;
+  gap: 3rem;
 }
 
 .row-year {
   color: var(--muted);
   flex-shrink: 0;
+  font-size: 0.85rem; /* lining figures read optically larger — compensate */
   font-variant-numeric: tabular-nums;
 }
 
@@ -208,8 +207,9 @@ b {
 
 .row-sub {
   display: block;
+  margin-top: 0.1rem;
   color: var(--muted);
-  max-width: 52ch;
+  max-width: 42ch;
 }
 
 .home-footer {
@@ -219,7 +219,7 @@ b {
   gap: 1.5rem;
   color: var(--muted);
   /* span the full viewport width with a 20px reserve on each edge */
-  margin-left: -20vw;
+  margin-left: -10vw;
   margin-right: -1.5rem;
   padding: 20px;
 }
@@ -248,13 +248,13 @@ b {
 
 .hover-preview {
   position: fixed;
-  right: 3rem;
-  top: 50%;
+  right: 4rem;
+  top: 50%; /* JS moves this to the hovered row's vertical position */
   width: min(24vw, 340px);
   aspect-ratio: 16 / 9;
   transform: translateY(-50%);
   opacity: 0;
-  transition: opacity 0.22s ease;
+  transition: opacity 0.22s ease, top 0.3s cubic-bezier(0.25, 1, 0.4, 1);
   pointer-events: none;
   z-index: 10;
 }
@@ -272,6 +272,34 @@ b {
 
 @media (hover: none), (max-width: 1180px) {
   .hover-preview {
+    display: none;
+  }
+}
+
+/* ---- cursor blob: the one pop of color ------------------------------------- */
+
+.cursor-blob {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  will-change: transform;
+}
+
+.cursor-blob.alive {
+  opacity: 1;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor-blob {
     display: none;
   }
 }
@@ -298,8 +326,8 @@ b {
 
 .project-title {
   margin: 0;
-  font-size: 1.35rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 400;
   line-height: 1.3;
 }
 
@@ -357,6 +385,7 @@ b {
 
 .prose {
   margin-top: 2.5rem;
+  line-height: 1.55; /* reading text keeps comfortable leading */
 }
 
 .prose > * {
@@ -365,13 +394,15 @@ b {
 
 .prose h2 {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 400;
+  color: var(--muted); /* headings are style 2, like "Work" on the index */
   margin-top: 2.4em;
 }
 
 .prose h3 {
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 400;
+  color: var(--muted);
   margin-top: 2.2em;
 }
 
@@ -481,7 +512,6 @@ figure.figure {
 
 .link-card-label {
   display: block;
-  font-weight: 500;
 }
 
 .link-card:hover .link-card-label {
