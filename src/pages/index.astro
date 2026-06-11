@@ -100,14 +100,6 @@ const year = new Date().getFullYear();
   <script>
     const bound = new WeakSet<Element>();
 
-    // deterministic 0..1 from a string, so each project's collage is stable
-    function rnd(seed: string) {
-      let h = 0;
-      for (const c of seed) h = (h * 31 + c.charCodeAt(0)) | 0;
-      const x = Math.sin(h) * 10000;
-      return x - Math.floor(x);
-    }
-
     function buildCollage(stage: HTMLElement, slug: string, items: { t: string; src: string }[]) {
       stage.innerHTML = '';
       const n = items.length;
@@ -125,18 +117,14 @@ const year = new Date().getFullYear();
         el.src = m.src;
         el.className = 'collage-item';
 
-        // unruly but deterministic placement around the stage centre
-        const r1 = rnd(slug + i);
-        const r2 = rnd(slug + i + 'b');
-        const r3 = rnd(slug + i + 'c');
-        const spread = (i - (n - 1) / 2) * (n > 1 ? 150 : 0);
-        const dx = spread + (r1 - 0.5) * 60;
-        const dy = (r2 - 0.5) * (n > 1 ? 140 : 40);
-        const rot = (r3 - 0.5) * (n > 1 ? 14 : 5);
-        const w = n > 1 ? 200 + r1 * 70 : 300;
+        // horizontal strip: no overlap, no rotation — items share the width
+        // evenly with small gaps, each nudged by a small vertical offset
+        const gap = 12;
+        const w = Math.min(n > 1 ? 260 : 320, (stage.clientWidth - (n - 1) * gap) / n);
+        const dy = n > 1 ? (i % 2 === 0 ? -1 : 1) * 16 : 0;
 
         el.style.width = `${w}px`;
-        el.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+        el.style.transform = `translateY(${dy}px)`;
         el.style.transitionDelay = `${i * 45}ms`;
         stage.appendChild(el);
       });

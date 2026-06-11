@@ -252,20 +252,22 @@ b {
   right: 3rem;
   top: 50%; /* JS moves this to the hovered row's vertical position */
   height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
   transition: top 0.3s cubic-bezier(0.25, 1, 0.4, 1);
   pointer-events: none;
   z-index: 10;
 }
 
 .collage-item {
-  position: absolute;
-  left: 50%;
-  top: 0;
+  flex: 0 0 auto;
   height: auto;
   display: block;
   opacity: 0;
   transition: opacity 0.2s ease;
-  /* translate/rotate set inline per item */
+  /* width + small translateY offset set inline per item */
 }
 
 .preview-stage.visible .collage-item {
