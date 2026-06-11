@@ -19,38 +19,29 @@ const rows = await Promise.all(
 <BaseLayout title="Aditya Manikashetti">
   <main class="wrap">
     <header class="masthead">
-      <p class="role-line meta-caps">Director · Creative Director · Creative Technologist</p>
       <h1 class="site-name">Aditya Manikashetti</h1>
       <p class="bio">
-        I direct films and build the technology that makes them. My work moves between
-        commercials, short film, and post-production VFX — and the tools and workflows
-        that hold all of it together.
-      </p>
-      <p class="contact">
-        <a href="mailto:krishna@penukonda.me">Email</a>
+        Director, creative director and creative technologist. I make commercials and short
+        films, and build the tools and workflows that hold post-production together.
+        <a href="mailto:krishna@penukonda.me">Email me</a> about select projects.
       </p>
     </header>
 
-    <section class="index" aria-label="Selected work">
-      <p class="index-heading meta-caps">Selected work</p>
+    <section class="index" aria-label="Work">
+      <h2 class="index-heading">Work</h2>
       {
         rows.map((r) => (
           <a class="index-row" href={`/work/${r.slug}/`} data-preview={r.previewSrc}>
-            <span class="row-top">
-              <span class="row-title" transition:name={`title-${r.slug}`}>
-                {r.data.title}
-              </span>
-              <span class="row-meta meta-caps">
-                {r.data.role} · {r.data.year}
-              </span>
+            <span class="row-title" transition:name={`title-${r.slug}`}>
+              {r.data.title}
             </span>
-            {r.data.summary && <span class="row-summary">{r.data.summary}</span>}
+            <span class="row-sub">
+              {r.data.summary} {r.data.role}, {r.data.year}.
+            </span>
           </a>
         ))
       }
     </section>
-
-    <footer class="site-footer meta-caps">Aditya Manikashetti · {new Date().getFullYear()}</footer>
   </main>
 
   <div class="hover-preview" aria-hidden="true"><img alt="" /></div>

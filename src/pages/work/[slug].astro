@@ -33,12 +33,12 @@ const ogImage = data.hero ? (await getImage({ src: data.hero, width: 1200 })).sr
 
 <BaseLayout title={`${data.title} — Aditya Manikashetti`} description={data.summary} ogImage={ogImage}>
   <main class="wrap">
-    <nav class="crumb meta-caps"><a href="/">Aditya Manikashetti</a></nav>
+    <nav class="crumb"><a href="/">← Aditya Manikashetti</a></nav>
 
     <article>
       <header class="project-header">
         <h1 class="project-title" transition:name={`title-${slug}`}>{data.title}</h1>
-        <p class="project-meta meta-caps">{metaLine}</p>
+        <p class="project-meta">{metaLine}</p>
         <p class="project-summary">{data.summary}</p>
       </header>
 
@@ -76,7 +76,6 @@ const ogImage = data.hero ? (await getImage({ src: data.hero, width: 1200 })).sr
 
     <footer class="project-footer">
       {prev ? <a href={`/work/${slugOf(prev)}/`}>← {prev.data.title}</a> : <span></span>}
-      <a href="/">Index</a>
       {next ? <a href={`/work/${slugOf(next)}/`}>{next.data.title} →</a> : <span></span>}
     </footer>
   </main>
