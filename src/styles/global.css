@@ -173,12 +173,14 @@ b {
   transition: opacity 0.2s ease;
 }
 
-/* hovering any row fades the rest back, focusing the one in question */
-.index-scroll:hover .index-row {
+/* hovering an actual row fades the rest back, focusing the one in question.
+   :has scopes this to a real row hover, so the empty space beside the text
+   (where the preview collage sits) does not dim everything. */
+.index-scroll:has(.index-row:hover) .index-row {
   opacity: 0.3;
 }
 
-.index-scroll:hover .index-row:hover {
+.index-scroll .index-row:hover {
   opacity: 1;
 }
 
