@@ -34,7 +34,7 @@ const ogImageUrl = ogImage ? new URL(ogImage, base) : undefined;
     {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
     <meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
     <meta name="generator" content={Astro.generator} />
-    <link rel="preload" href="/fonts/satoshi-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/satoshi-variable.woff2" as="font" type="font/woff2" crossorigin />
     <ClientRouter />
   </head>
   <body>
