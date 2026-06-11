@@ -218,6 +218,17 @@ b {
     padding: 4rem 1.5rem 0;
   }
 
+  .project {
+    padding: 4rem 1.5rem 0;
+  }
+
+  .project-hero,
+  .prose .video-embed,
+  .prose .image-grid,
+  .prose .figure {
+    width: 100%;
+  }
+
   .index-scroll {
     overflow: visible;
     mask-image: none;
@@ -230,34 +241,39 @@ b {
   }
 }
 
-/* ---- hover preview (desktop-only enhancement) ----------------------------- */
+/* ---- hover collage (desktop-only enhancement) ------------------------------
+   A fixed stage centred in the empty space right of the work list. JS drops
+   1..n media items (images / muted loops) onto it with deterministic scatter. */
 
-.hover-preview {
+.preview-stage {
   position: fixed;
-  right: 4rem;
+  /* centred in the gap between the list column and the right edge */
+  left: calc(10vw + 640px + 3rem);
+  right: 3rem;
   top: 50%; /* JS moves this to the hovered row's vertical position */
-  width: min(24vw, 340px);
-  aspect-ratio: 16 / 9;
-  transform: translateY(-50%);
-  opacity: 0;
-  transition: opacity 0.22s ease, top 0.3s cubic-bezier(0.25, 1, 0.4, 1);
+  height: 0;
+  transition: top 0.3s cubic-bezier(0.25, 1, 0.4, 1);
   pointer-events: none;
   z-index: 10;
 }
 
-.hover-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.collage-item {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: auto;
   display: block;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  /* translate/rotate set inline per item */
 }
 
-.hover-preview.visible {
+.preview-stage.visible .collage-item {
   opacity: 1;
 }
 
 @media (hover: none), (max-width: 1180px) {
-  .hover-preview {
+  .preview-stage {
     display: none;
   }
 }
@@ -290,10 +306,21 @@ b {
   }
 }
 
-/* ---- project page ---------------------------------------------------------- */
+/* ---- project page -----------------------------------------------------------
+   Same frame as home: anchored 10vw left / 10vh top, everything left-aligned.
+   The back link sits exactly where the name sits on the home page. */
+
+.project {
+  padding: 10vh 1.5rem 0 10vw;
+}
+
+.project > article,
+.project > .crumb,
+.project > .project-footer {
+  max-width: var(--col);
+}
 
 .crumb {
-  padding-top: 2.5rem;
   font-size: 1rem;
 }
 
@@ -307,7 +334,7 @@ b {
 }
 
 .project-header {
-  margin-top: clamp(3rem, 10vh, 5rem);
+  margin-top: clamp(2.5rem, 7vh, 4rem);
 }
 
 .project-title {
@@ -357,14 +384,16 @@ b {
   color: var(--ink);
 }
 
-/* ---- media breakout: media spans wider than the prose column --------------- */
+/* ---- media breakout: media extends right of the prose column ---------------
+   Left edge stays aligned with the text (left-aligned system); only the right
+   side grows, up to --col-wide or the viewport. */
 
 .project-hero,
 .prose .video-embed,
 .prose .image-grid,
 .prose .figure {
-  width: min(var(--col-wide), 100vw - 2 * var(--gutter));
-  margin-inline: calc(50% - min(var(--col-wide), 100vw - 2 * var(--gutter)) / 2);
+  width: min(var(--col-wide), 100vw - 10vw - 2 * var(--gutter));
+  margin-inline: 0;
 }
 
 /* ---- prose ------------------------------------------------------------------ */
@@ -378,18 +407,21 @@ b {
   margin-block: 0 1.2em;
 }
 
+/* Chapters: muted label at the column's left edge, separated by generous air —
+   the heading marks a section the way "Work" does on the home page. */
 .prose h2 {
   font-size: 1rem;
   font-weight: inherit;
-  color: var(--muted); /* headings are style 2, like "Work" on the index */
-  margin-top: 2.4em;
+  color: var(--muted);
+  margin-top: 3.2em;
+  margin-bottom: 1.2em;
 }
 
 .prose h3 {
   font-size: 1rem;
   font-weight: inherit;
   color: var(--muted);
-  margin-top: 2.2em;
+  margin-top: 2.4em;
 }
 
 .prose blockquote {
@@ -400,9 +432,11 @@ b {
 }
 
 .prose hr {
+  /* section divider: a short left-aligned hairline, benji's "* * *" in our voice */
   border: 0;
   border-top: 1px solid var(--line);
-  margin-block: 2.5rem;
+  width: 3rem;
+  margin: 3rem 0;
 }
 
 .prose ul,

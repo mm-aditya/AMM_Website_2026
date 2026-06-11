@@ -9,7 +9,8 @@ Cloudflare Pages in about a minute. To publish or edit work, you only ever touch
 1. Scaffold: `npm run new "Project Name"` → creates `src/content/work/project-name/index.mdx` with `draft: true`.
 2. Fill in the frontmatter and write the body (see schema and components below).
 3. Add images to the same folder:
-   - `preview.jpg` — 960×540, shown on homepage hover. Required for the hover effect.
+   - hover-collage media, listed in `previews` — 1–4 items, images (≈960×540) and/or short muted
+     mp4/webm loops (≤ 5 MB, ≤ 4 s). One item shows centered; several scatter into a loose collage.
    - `hero.jpg` — 1600×900, the page's lead image (skip if `videoId` is set — video takes its place; if both are set, video leads and hero becomes the link-sharing image).
    - any body images (stills, screenshots, diagrams) — ≤ 1600px wide, JPG/PNG, keep each under 1 MB. Astro optimizes at build.
 4. Set `draft: false`.
@@ -26,7 +27,7 @@ role: "Director"               # required — what Aditya did. Front "Director",
 client: "Studio / brand"       # optional
 type: film                     # required: film | tech | writing
 summary: "One line shown on the homepage row and used as the page description."  # required
-preview: ./preview.jpg         # optional but strongly encouraged
+previews: ["./preview.jpg", "./still-01.jpg", "./loop.mp4"]  # hover collage, 1-4 mixed media; strongly encouraged
 featured: false                # optional — true pins it to the top of the index
 hero: ./hero.jpg               # optional
 videoId: "vimeo:76979871"      # optional — provider-prefixed: gumlet:ASSETID | vimeo:ID | youtube:ID
@@ -89,8 +90,14 @@ No marketing language, no superlatives, no "passionate", no exclamation marks.
   Do not introduce color anywhere else.
 - Homepage is a fixed composition anchored at 10% left / 10% top: masthead, then the work list
   scrolling inside its own region (fade-out at the bottom, hairline scrollbar at the far right
-  of the screen), with a muted name/© line pinned to the bottom edge. The hover preview appears
-  at the hovered row's vertical position. Below 1000px it falls back to normal page flow.
+  of the screen), with a muted name/© line pinned to the bottom edge. The hover collage appears
+  centred in the space right of the list, at the hovered row's vertical position. Below 1000px
+  it falls back to normal page flow.
+- Project pages share the same frame: anchored 10vw left / 10vh top, fully left-aligned. The
+  "← Aditya Manikashetti" back link sits exactly where the name sits on home. Text column is
+  640px; media keeps the same left edge and extends right up to 940px. Chapters are muted `##`
+  headings with generous air above; `---` renders as a short hairline section divider; end a
+  big project with a Credits chapter (benji-style acknowledgements).
 - Index rows render as: bold title with the year right-aligned, then one muted line =
   `{summary} {role}.` — so write every `summary` as a sentence that reads naturally before the
   role, e.g. "A short documentary following a seasonal migration route through the high desert."

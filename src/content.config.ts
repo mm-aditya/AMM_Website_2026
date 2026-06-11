@@ -11,7 +11,11 @@ const work = defineCollection({
       client: z.string().optional(),
       type: z.enum(['film', 'tech', 'writing']),
       summary: z.string(),
-      preview: image().optional(),
+      preview: image().optional(), // deprecated — use `previews`
+      // Hover collage media: filenames relative to the project folder, e.g.
+      // ["./preview.jpg", "./still-01.jpg", "./loop.mp4"]. Images and short
+      // muted mp4/webm loops can be mixed; all pop up together on hover.
+      previews: z.array(z.string()).default([]),
       featured: z.boolean().default(false),
       hero: image().optional(),
       videoId: z.string().optional(),

@@ -2,17 +2,50 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 
 const projects = (await getCollection('work', ({ data }) => !data.draft)).sort(
   (a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.year - a.data.year
 );
 
+// Resolve hover-collage media (mixed images + video loops) from project folders.
+const imgMods = import.meta.glob<ImageMetadata>(
+  '../content/work/**/*.{jpg,jpeg,png,webp,avif}',
+  { eager: true, import: 'default' }
+);
+const vidMods = import.meta.glob<string>('../content/work/**/*.{mp4,webm}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+
+async function resolvePreviews(slug: string, names: string[]) {
+  const out: { t: 'img' | 'vid'; src: string }[] = [];
+  for (const name of names) {
+    const key = `../content/work/${slug}/${name.replace(/^\.\//, '')}`;
+    if (key in vidMods) {
+      out.push({ t: 'vid', src: vidMods[key] });
+    } else if (key in imgMods) {
+      out.push({ t: 'img', src: (await getImage({ src: imgMods[key], width: 640 })).src });
+    }
+  }
+  return out;
+}
+
 const rows = await Promise.all(
-  projects.map(async (p) => ({
-    slug: p.id.replace(/\/index$/, ''),
-    data: p.data,
-    previewSrc: p.data.preview ? (await getImage({ src: p.data.preview, width: 720 })).src : null,
-  }))
+  projects.map(async (p) => {
+    const slug = p.id.replace(/\/index$/, '');
+    const names = p.data.previews.length
+      ? p.data.previews
+      : p.data.preview
+        ? ['./preview.jpg']
+        : [];
+    return {
+      slug,
+      data: p.data,
+      previews: await resolvePreviews(slug, names),
+    };
+  })
 );
 
 const year = new Date().getFullYear();
@@ -35,7 +68,12 @@ const year = new Date().getFullYear();
       <div class="index-scroll">
         {
           rows.map((r) => (
-            <a class="index-row" href={`/work/${r.slug}/`} data-preview={r.previewSrc}>
+            <a
+              class="index-row"
+              href={`/work/${r.slug}/`}
+              data-previews={JSON.stringify(r.previews)}
+              data-slug={r.slug}
+            >
               <span class="row-top">
                 <span class="row-title" transition:name={`title-${r.slug}`}>
                   {r.data.title}
@@ -57,37 +95,82 @@ const year = new Date().getFullYear();
     </footer>
   </main>
 
-  <div class="hover-preview" aria-hidden="true"><img alt="" /></div>
+  <div class="preview-stage" aria-hidden="true"></div>
 
   <script>
     const bound = new WeakSet<Element>();
 
+    // deterministic 0..1 from a string, so each project's collage is stable
+    function rnd(seed: string) {
+      let h = 0;
+      for (const c of seed) h = (h * 31 + c.charCodeAt(0)) | 0;
+      const x = Math.sin(h) * 10000;
+      return x - Math.floor(x);
+    }
+
+    function buildCollage(stage: HTMLElement, slug: string, items: { t: string; src: string }[]) {
+      stage.innerHTML = '';
+      const n = items.length;
+      items.forEach((m, i) => {
+        const el =
+          m.t === 'vid' ? document.createElement('video') : document.createElement('img');
+        if (el instanceof HTMLVideoElement) {
+          el.muted = true;
+          el.autoplay = true;
+          el.loop = true;
+          el.playsInline = true;
+        } else {
+          el.alt = '';
+        }
+        el.src = m.src;
+        el.className = 'collage-item';
+
+        // unruly but deterministic placement around the stage centre
+        const r1 = rnd(slug + i);
+        const r2 = rnd(slug + i + 'b');
+        const r3 = rnd(slug + i + 'c');
+        const spread = (i - (n - 1) / 2) * (n > 1 ? 150 : 0);
+        const dx = spread + (r1 - 0.5) * 60;
+        const dy = (r2 - 0.5) * (n > 1 ? 140 : 40);
+        const rot = (r3 - 0.5) * (n > 1 ? 14 : 5);
+        const w = n > 1 ? 200 + r1 * 70 : 300;
+
+        el.style.width = `${w}px`;
+        el.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+        el.style.transitionDelay = `${i * 45}ms`;
+        stage.appendChild(el);
+      });
+    }
+
     function initHoverPreview() {
-      const box = document.querySelector('.hover-preview');
-      const img = box?.querySelector('img');
-      if (!box || !img || !window.matchMedia('(hover: hover)').matches) return;
+      const stage = document.querySelector<HTMLElement>('.preview-stage');
+      if (!stage || !window.matchMedia('(hover: hover)').matches) return;
+      let current = '';
 
       document.querySelectorAll<HTMLAnchorElement>('.index-row').forEach((row) => {
         if (bound.has(row)) return;
         bound.add(row);
+
         row.addEventListener('mouseenter', () => {
-          const src = row.dataset.preview;
-          if (!src) {
-            box.classList.remove('visible');
+          const items = JSON.parse(row.dataset.previews || '[]');
+          const slug = row.dataset.slug || '';
+          if (!items.length) {
+            stage.classList.remove('visible');
             return;
           }
-          if (img.getAttribute('src') !== src) img.setAttribute('src', src);
-          // align the preview with the hovered row, clamped to the viewport
+          if (current !== slug) {
+            current = slug;
+            buildCollage(stage, slug, items);
+          }
           const rect = row.getBoundingClientRect();
-          const half = (box as HTMLElement).offsetHeight / 2 || 100;
           const yPos = Math.min(
-            Math.max(rect.top + rect.height / 2, half + 16),
-            window.innerHeight - half - 16
+            Math.max(rect.top + rect.height / 2, 180),
+            window.innerHeight - 180
           );
-          (box as HTMLElement).style.top = `${yPos}px`;
-          box.classList.add('visible');
+          stage.style.top = `${yPos}px`;
+          stage.classList.add('visible');
         });
-        row.addEventListener('mouseleave', () => box.classList.remove('visible'));
+        row.addEventListener('mouseleave', () => stage.classList.remove('visible'));
       });
     }
 
