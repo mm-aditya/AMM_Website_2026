@@ -134,6 +134,9 @@ body → links → prev/next):
 ### Voice
 Restrained and concrete. Short sentences. Say what was made, how, and what was hard.
 No marketing language, no superlatives, no "passionate", no exclamation marks, no "delve".
+**Before writing or editing ANY copy (summary, body, captions), read `VOICE.md` in full**
+— it is the canonical tone guide, with rules and calibration examples. Copy that doesn't
+match it doesn't ship.
 
 ## Design rules (relevant only if Aditya asks for design work)
 
@@ -162,6 +165,7 @@ If a build fails, read the error: it names the project and field. Fix, re-run `n
 ## File map (for orientation, not modification)
 
 - `src/content/work/<slug>/index.mdx` — all content lives here
+- `VOICE.md` — the tone guide; mandatory reading before writing any copy
 - `src/content.config.ts` — schema | `scripts/validate-content.mjs` — validator
 - `src/pages/index.astro` — home | `src/pages/work/[slug].astro` — project template
 - `src/styles/global.css` — entire design system | `src/layouts/BaseLayout.astro` — head/meta/blob
